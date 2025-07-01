@@ -145,7 +145,7 @@ public class ActionExecutionOperator<K> extends AbstractStreamOperator<EventMess
     private void processEventMessage(EventMessage<K> eventMessage) throws Exception {
         LOG.debug("ActionExecutionOperator process element {}", eventMessage);
         Event event = eventMessage.getEvent();
-        List<Action> actions = workflowPlan.getEventTriggerActions(event.getClass());
+        List<Action> actions = workflowPlan.getEventTriggerActions(event.getEventType());
         if (actions != null && !actions.isEmpty()) {
             // add pending action count for InputEvent.
             // We should record the number of actions to be processed for each event only once.
@@ -181,7 +181,8 @@ public class ActionExecutionOperator<K> extends AbstractStreamOperator<EventMess
                                 reusedSideOutputStreamRecord.replace(actionOutputEventMessage));
                     } else {
                         List<Action> pendingActions =
-                                workflowPlan.getEventTriggerActions(actionOutputEvent.getClass());
+                                workflowPlan.getEventTriggerActions(
+                                        actionOutputEvent.getClass().getName());
                         addPendingActionCount(pendingActions == null ? 0 : pendingActions.size());
                         output.collect(reusedStreamRecord.replace(actionOutputEventMessage));
                     }
