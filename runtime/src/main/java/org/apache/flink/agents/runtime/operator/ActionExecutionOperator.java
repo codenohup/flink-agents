@@ -39,6 +39,7 @@ import org.apache.flink.streaming.api.operators.AbstractStreamOperator;
 import org.apache.flink.streaming.api.operators.ChainingStrategy;
 import org.apache.flink.streaming.api.operators.OneInputStreamOperator;
 import org.apache.flink.streaming.runtime.streamrecord.StreamRecord;
+import org.apache.flink.streaming.runtime.tasks.ProcessingTimeService;
 import org.apache.flink.util.OutputTag;
 import org.apache.flink.util.Preconditions;
 import org.slf4j.Logger;
@@ -97,9 +98,11 @@ public class ActionExecutionOperator<K> extends AbstractStreamOperator<EventMess
 
     public ActionExecutionOperator(
             OutputTag<EventMessage<K>> sideOutputTag,
+            ProcessingTimeService processingTimeService,
             WorkflowPlan workflowPlan,
             TypeInformation<EventMessage<K>> eventMessageTypeInfo) {
         this.sideOutputTag = sideOutputTag;
+        this.processingTimeService = processingTimeService;
         this.workflowPlan = workflowPlan;
         this.eventMessageTypeInfo = eventMessageTypeInfo;
         this.runnerContext = new RunnerContextImpl();

@@ -100,6 +100,7 @@ public class FeedbackOperator<K> extends AbstractStreamOperator<EventMessage<K>>
     @Override
     @SuppressWarnings("unchecked")
     public void initializeState(StateInitializationContext context) throws Exception {
+        System.out.println("FeedbackOperator#initializeState");
         super.initializeState(context);
 
         final IOManager ioManager = getContainingTask().getEnvironment().getIOManager();

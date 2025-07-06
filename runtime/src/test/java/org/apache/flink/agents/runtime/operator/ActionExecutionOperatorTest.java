@@ -28,6 +28,7 @@ import org.apache.flink.agents.runtime.message.EventMessage;
 import org.apache.flink.api.common.typeinfo.TypeHint;
 import org.apache.flink.api.common.typeinfo.TypeInformation;
 import org.apache.flink.streaming.runtime.streamrecord.StreamRecord;
+import org.apache.flink.streaming.runtime.tasks.TestProcessingTimeService;
 import org.apache.flink.streaming.util.KeyedOneInputStreamOperatorTestHarness;
 import org.apache.flink.util.OutputTag;
 import org.junit.jupiter.api.Test;
@@ -54,6 +55,7 @@ public class ActionExecutionOperatorTest {
         ActionExecutionOperator<Long> operator =
                 new ActionExecutionOperator<>(
                         TEST_OUTPUT_TAG,
+                        new TestProcessingTimeService(),
                         TestWorkflow.getWorkflowPlan(),
                         TEST_EVENT_MESSAGE_TYPE_INFO);
         try (KeyedOneInputStreamOperatorTestHarness<Long, EventMessage<Long>, EventMessage<Long>>
@@ -104,6 +106,7 @@ public class ActionExecutionOperatorTest {
         ActionExecutionOperator<Long> operator =
                 new ActionExecutionOperator<>(
                         TEST_OUTPUT_TAG,
+                        new TestProcessingTimeService(),
                         TestWorkflow.getWorkflowPlan(),
                         TEST_EVENT_MESSAGE_TYPE_INFO);
         try (KeyedOneInputStreamOperatorTestHarness<Long, EventMessage<Long>, EventMessage<Long>>
@@ -149,6 +152,7 @@ public class ActionExecutionOperatorTest {
         ActionExecutionOperator<Long> operator =
                 new ActionExecutionOperator<>(
                         TEST_OUTPUT_TAG,
+                        new TestProcessingTimeService(),
                         TestWorkflow.getWorkflowPlan(),
                         TEST_EVENT_MESSAGE_TYPE_INFO);
         try (KeyedOneInputStreamOperatorTestHarness<Long, EventMessage<Long>, EventMessage<Long>>
@@ -201,7 +205,7 @@ public class ActionExecutionOperatorTest {
         }
 
         public static WorkflowPlan getWorkflowPlan() throws Exception {
-            Map<Class<? extends Event>, List<Action>> eventTriggerActions = new HashMap<>();
+            Map<String, List<Action>> eventTriggerActions = new HashMap<>();
             Action action1 =
                     new Action(
                             "processInputEvent",
@@ -209,7 +213,7 @@ public class ActionExecutionOperatorTest {
                                     TestWorkflow.class,
                                     "processInputEvent",
                                     new Class<?>[] {InputEvent.class, RunnerContext.class}),
-                            Collections.singletonList(InputEvent.class));
+                            Collections.singletonList(InputEvent.class.getCanonicalName()));
             Action action2 =
                     new Action(
                             "processMiddleEvent",
@@ -217,9 +221,11 @@ public class ActionExecutionOperatorTest {
                                     TestWorkflow.class,
                                     "processMiddleEvent",
                                     new Class<?>[] {MiddleEvent.class, RunnerContext.class}),
-                            Collections.singletonList(MiddleEvent.class));
-            eventTriggerActions.put(InputEvent.class, Collections.singletonList(action1));
-            eventTriggerActions.put(MiddleEvent.class, Collections.singletonList(action2));
+                            Collections.singletonList(MiddleEvent.class.getCanonicalName()));
+            eventTriggerActions.put(
+                    InputEvent.class.getCanonicalName(), Collections.singletonList(action1));
+            eventTriggerActions.put(
+                    MiddleEvent.class.getCanonicalName(), Collections.singletonList(action2));
             Map<String, Action> actions = new HashMap<>();
             actions.put(action1.getName(), action1);
             actions.put(action2.getName(), action2);

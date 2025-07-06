@@ -56,7 +56,11 @@ public class ActionExecutionOperatorFactory<K>
     public <T extends StreamOperator<EventMessage<K>>> T createStreamOperator(
             StreamOperatorParameters<EventMessage<K>> streamOperatorParameters) {
         ActionExecutionOperator<K> op =
-                new ActionExecutionOperator<>(outputTag, workflowPlan, eventMessageTypeInfo);
+                new ActionExecutionOperator<>(
+                        outputTag,
+                        streamOperatorParameters.getProcessingTimeService(),
+                        workflowPlan,
+                        eventMessageTypeInfo);
         op.setup(
                 streamOperatorParameters.getContainingTask(),
                 streamOperatorParameters.getStreamConfig(),

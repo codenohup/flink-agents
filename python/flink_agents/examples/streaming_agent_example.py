@@ -27,7 +27,8 @@ from pyflink.datastream.connectors.file_system import FileSource, StreamFormat
 
 from flink_agents.api.execution_enviroment import AgentsExecutionEnvironment
 from flink_agents.examples.stream_agent_declaration import MyWorkflow
-
+import os
+os.environ['PYTHONPATH'] = "/Users/huangxu/Desktop/codingspace/flink-agents/.venv/lib/python3.10/site-packages"
 
 class ItemData(BaseModel):
     """Data model for storing item information.

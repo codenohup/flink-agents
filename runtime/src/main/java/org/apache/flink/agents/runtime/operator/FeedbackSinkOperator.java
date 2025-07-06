@@ -26,6 +26,7 @@ import org.apache.flink.agents.runtime.message.EventMessage;
 import org.apache.flink.agents.runtime.message.Message;
 import org.apache.flink.streaming.api.operators.AbstractStreamOperator;
 import org.apache.flink.streaming.api.operators.OneInputStreamOperator;
+import org.apache.flink.streaming.api.operators.StreamTaskStateInitializer;
 import org.apache.flink.streaming.runtime.streamrecord.StreamRecord;
 import org.apache.flink.util.IOUtils;
 import org.slf4j.Logger;
@@ -56,6 +57,15 @@ public class FeedbackSinkOperator<K> extends AbstractStreamOperator<Void>
 
     public FeedbackSinkOperator(FeedbackKey<Message> key) {
         this.key = Objects.requireNonNull(key);
+    }
+
+    @Override
+    public void initializeState(StreamTaskStateInitializer streamTaskStateManager)
+            throws Exception {
+        System.out.println("FeedbackSink initializeState");
+        super.initializeState(streamTaskStateManager);
+        // TypeSerializer<?> keySerializer =
+        // this.config.getStateKeySerializer(this.getUserCodeClassloader());
     }
 
     @Override
