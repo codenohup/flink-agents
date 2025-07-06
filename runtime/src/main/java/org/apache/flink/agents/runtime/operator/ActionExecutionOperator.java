@@ -272,6 +272,9 @@ public class ActionExecutionOperator<K> extends AbstractStreamOperator<EventMess
                             getRuntimeContext().getJobInfo().getJobId());
             pythonActionExecutor = new PythonActionExecutor(pythonEnvironmentManager);
             pythonActionExecutor.open();
+            // Java的runenrContext和python的runnerContext不是同一个对象
+            // TODO：这块要不要合并成一个RunnerContextImpl，应该合并不了，action有java也有python的
+            pythonActionExecutor.setStore(pendingMemoryStoreState);
         }
     }
 

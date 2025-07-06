@@ -38,6 +38,7 @@ class FlinkMemoryObject(MemoryObject):
         try:
             self._j_memory_object.set(path, value)
         except Exception as e:
+            print(e)
             raise RuntimeError(f"Failed to set value at path '{path}'") from e
 
     def new_object(self, path: str, overwrite: bool = False) -> "FlinkMemoryObject":
@@ -49,7 +50,7 @@ class FlinkMemoryObject(MemoryObject):
         except Exception as e:
             raise RuntimeError(f"Failed to create new object at path '{path}'") from e
 
-    def is_exists(self, path: str) -> bool:
+    def is_exist(self, path: str) -> bool:
         """Check if a field exists at the given path."""
         try:
             return self._j_memory_object.isExist(path)

@@ -21,8 +21,10 @@ import org.apache.flink.agents.api.Event;
 import org.apache.flink.agents.plan.PythonFunction;
 import org.apache.flink.agents.runtime.env.EmbeddedPythonEnvironment;
 import org.apache.flink.agents.runtime.env.PythonEnvironmentManager;
+import org.apache.flink.agents.runtime.memory.MemoryObjectImpl;
 import org.apache.flink.agents.runtime.python.context.PythonRunnerContextImpl;
 import org.apache.flink.agents.runtime.python.event.PythonEvent;
+import org.apache.flink.api.common.state.MapState;
 import pemja.core.PythonInterpreter;
 
 import java.util.List;
@@ -48,6 +50,10 @@ public class PythonActionExecutor {
     public PythonActionExecutor(PythonEnvironmentManager environmentManager) {
         this.environmentManager = environmentManager;
         this.runnerContext = new PythonRunnerContextImpl();
+    }
+
+    public void setStore(MapState<String, MemoryObjectImpl.ValueWrapper> store) {
+        this.runnerContext.setStore(store);
     }
 
     public void open() throws Exception {

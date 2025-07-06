@@ -32,10 +32,12 @@ import org.apache.flink.api.common.typeinfo.TypeInformation;
 import org.apache.flink.shaded.jackson2.com.fasterxml.jackson.core.JsonProcessingException;
 import org.apache.flink.shaded.jackson2.com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.flink.streaming.api.datastream.DataStream;
+import org.apache.flink.streaming.api.datastream.DataStreamUtils;
 import org.apache.flink.streaming.api.datastream.SingleOutputStreamOperator;
-import org.apache.flink.streaming.api.typeinfo.python.PickledByteArrayTypeInfo;
 import org.apache.flink.types.Row;
 import org.apache.flink.util.OutputTag;
+
+import java.nio.charset.StandardCharsets;
 
 /** A utility class that bridges Flink DataStream/SQL with the Flink Agents workflow. */
 public class FlinkAgent {
@@ -44,12 +46,14 @@ public class FlinkAgent {
             DataStream<Row> inputDataStream, String workflowPlanJson)
             throws JsonProcessingException {
         // convert python InputEvent in input datastream to EventMessage.
-        DataStream<EventMessage<byte[]>> map =
+        DataStream<EventMessage<String>> map =
                 inputDataStream
                         .map(
                                 row ->
                                         new EventMessage<>(
-                                                (byte[]) row.getField(0),
+                                                new String(
+                                                        (byte[]) row.getField(0),
+                                                        StandardCharsets.UTF_8),
                                                 new PythonEvent(
                                                         (byte[]) row.getField(1),
                                                         "flink_agents.api.event.InputEvent")))
@@ -58,8 +62,8 @@ public class FlinkAgent {
         WorkflowPlan plan = new ObjectMapper().readValue(workflowPlanJson, WorkflowPlan.class);
 
         // call internal implementation.
-        DataStream<EventMessage<byte[]>> output =
-                connectToWorkflow(map, PickledByteArrayTypeInfo.PICKLED_BYTE_ARRAY_TYPE_INFO, plan);
+        DataStream<EventMessage<String>> output =
+                connectToWorkflow(map, TypeInformation.of(String.class), plan);
         // convert EventMessage in output datastream to python OutputEvent.
         return output.map(x -> ((PythonEvent) x.getEvent()).getEvent());
     }
@@ -104,11 +108,10 @@ public class FlinkAgent {
         OutputTag<EventMessage<K>> outputTag =
                 new OutputTag<>("feedback-output", eventMessageTypeInfo);
         SingleOutputStreamOperator<EventMessage<K>> actionExecuteDatastream =
-                //                DataStreamUtils.reinterpretAsKeyedStream(
-                //                                feedbackDatastream, new EventMessageKeySelector(),
-                // keyTypeInfo)
-                feedbackDatastream
-                        .keyBy(new EventMessageKeySelector(), keyTypeInfo)
+                DataStreamUtils.reinterpretAsKeyedStream(
+                                feedbackDatastream, new EventMessageKeySelector(), keyTypeInfo)
+                        //                feedbackDatastream
+                        //                        .keyBy(new EventMessageKeySelector(), keyTypeInfo)
                         .transform(
                                 "action-execute",
                                 eventMessageTypeInfo,
